@@ -27,19 +27,29 @@ export default function HomeScreen({ navigation }) {
     }, [])
   );
 
-  const saveTimersToStorage = async (updatedTimers) => {
-    setTimers(updatedTimers);
-    await AsyncStorage.setItem("timers", JSON.stringify(updatedTimers));
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+  
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
-
 
   const saveCompletedTimer = async (timer) => {
     const history = await AsyncStorage.getItem("history");
     const historyData = history ? JSON.parse(history) : [];
-    const completionTime = new Date().toISOString(); 
+    const completionTime = formatDate(new Date());
 
     historyData.push({ ...timer, completionTime });
     await AsyncStorage.setItem("history", JSON.stringify(historyData));
+  };
+
+  const saveTimersToStorage = async (updatedTimers) => {
+    setTimers(updatedTimers);
+    await AsyncStorage.setItem("timers", JSON.stringify(updatedTimers));
   };
 
   const startTimer = (id) => {
@@ -93,7 +103,7 @@ export default function HomeScreen({ navigation }) {
             timer.status = "Completed";
             clearInterval(timerRefs.current[id]);
             delete timerRefs.current[id];
-            saveCompletedTimer(timer); // Save completed timer to history
+            saveCompletedTimer(timer);
             Alert.alert("Timer Completed", `Timer "${timer.name}" is done!`);
           }
         }
