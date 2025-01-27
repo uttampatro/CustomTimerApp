@@ -14,6 +14,7 @@ import { useFocusEffect } from "@react-navigation/native";
 export default function HomeScreen({ navigation }) {
   const [timers, setTimers] = useState([]);
   const timerRefs = useRef({});
+  const [selectedCategory, setSelectedCategory] = useState("All"); 
 
   const loadTimers = async () => {
     const storedTimers = await AsyncStorage.getItem("timers");
@@ -96,17 +97,41 @@ export default function HomeScreen({ navigation }) {
     return acc;
   }, {});
 
-  const sections = Object.keys(groupedTimers).map((category) => ({
-    title: category,
-    data: groupedTimers[category],
-  }));
+  const filteredTimers = selectedCategory === "All" ? timers : groupedTimers[selectedCategory] || [];
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Timers</Text>
 
+      <View style={styles.categoryContainer}>
+        {["All", "Workout", "Study", "Break"].map((category) => (
+          <TouchableOpacity
+            key={category}
+            style={[
+              styles.categoryButton,
+              selectedCategory === category && styles.selectedCategory,
+            ]}
+            onPress={() => setSelectedCategory(category)}
+          >
+            <Text
+              style={[
+                styles.categoryText,
+                selectedCategory === category && styles.selectedCategoryText,
+              ]}
+            >
+              {category}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       <SectionList
-        sections={sections}
+        sections={[
+          {
+            title: selectedCategory,
+            data: filteredTimers,
+          },
+        ]}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
           const progress =
@@ -170,6 +195,35 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: "center",
   },
+  categoryContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginVertical: 10,
+  },
+  categoryButton: {
+    padding: 10,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    alignItems: "center",
+    width: "20%",
+  },
+  selectedCategory: {
+    backgroundColor: "#000",
+  },
+  categoryText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  selectedCategoryText: {
+    color: "#fff",
+  },
+  sectionHeader: {
+    fontSize: 20,
+    fontWeight: "bold",
+    paddingVertical: 10,
+    marginBottom: 5,
+    borderRadius: 5,
+  },
   timerCard: {
     padding: 15,
     marginVertical: 10,
@@ -182,13 +236,6 @@ const styles = StyleSheet.create({
   },
   timerName: { fontSize: 18, fontWeight: "bold", color: "#333" },
   timerInfo: { fontSize: 14, color: "#666", marginTop: 5 },
-  sectionHeader: {
-    fontSize: 20,
-    fontWeight: "bold",
-    paddingVertical: 10,
-    marginBottom: 5,
-    borderRadius: 5,
-  },
   progressBar: {
     height: 6,
     backgroundColor: "#e0e0e0",
