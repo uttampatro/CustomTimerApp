@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   Button,
-  FlatList,
   StyleSheet,
   SectionList,
+  TouchableOpacity,
+  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
@@ -45,10 +46,24 @@ export default function HomeScreen({ navigation }) {
         renderItem={({ item }) => (
           <View style={styles.timerCard}>
             <Text style={styles.timerName}>{item.name}</Text>
-            <Text style={styles.timerInfo}>Duration: {item.duration}s</Text>
+            <Text style={styles.timerInfo}>
+              Remaining Time: {item.remainingTime}s
+            </Text>
             <Text style={styles.timerInfo}>
               Status: {item.status || "Paused"}
             </Text>
+
+            <View style={styles.buttonRow}>
+              <TouchableOpacity style={styles.button}>
+                <Text style={styles.buttonText}>Start</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.button}>
+                <Text style={styles.buttonText}>Pause</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.button}>
+                <Text style={styles.buttonText}>Reset</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
         renderSectionHeader={({ section: { title } }) => (
@@ -90,5 +105,23 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginBottom: 5,
     borderRadius: 5,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 10,
+  },
+  button: {
+    padding: 10,
+    backgroundColor: "#000",
+    borderRadius: 8,
+    flex: 1,
+    alignItems: "center",
+    marginHorizontal: 5,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 14,
   },
 });
