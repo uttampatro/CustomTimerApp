@@ -14,7 +14,7 @@ import { useFocusEffect } from "@react-navigation/native";
 export default function HomeScreen({ navigation }) {
   const [timers, setTimers] = useState([]);
   const timerRefs = useRef({});
-  const [selectedCategory, setSelectedCategory] = useState("All"); 
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   const loadTimers = async () => {
     const storedTimers = await AsyncStorage.getItem("timers");
@@ -30,6 +30,16 @@ export default function HomeScreen({ navigation }) {
   const saveTimersToStorage = async (updatedTimers) => {
     setTimers(updatedTimers);
     await AsyncStorage.setItem("timers", JSON.stringify(updatedTimers));
+  };
+
+
+  const saveCompletedTimer = async (timer) => {
+    const history = await AsyncStorage.getItem("history");
+    const historyData = history ? JSON.parse(history) : [];
+    const completionTime = new Date().toISOString(); 
+
+    historyData.push({ ...timer, completionTime });
+    await AsyncStorage.setItem("history", JSON.stringify(historyData));
   };
 
   const startTimer = (id) => {
@@ -83,6 +93,7 @@ export default function HomeScreen({ navigation }) {
             timer.status = "Completed";
             clearInterval(timerRefs.current[id]);
             delete timerRefs.current[id];
+            saveCompletedTimer(timer); // Save completed timer to history
             Alert.alert("Timer Completed", `Timer "${timer.name}" is done!`);
           }
         }
@@ -101,8 +112,17 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Timers</Text>
-
+      <View style={styles.headerContainer}>
+        <Button
+          title="Add Timer"
+          onPress={() => navigation.navigate("AddTimer")}
+        />
+        <Text style={styles.title}>Timers</Text>
+        <Button
+          title="History"
+          onPress={() => navigation.navigate("History")}
+        />
+      </View>
       <View style={styles.categoryContainer}>
         {["All", "Workout", "Study", "Break"].map((category) => (
           <TouchableOpacity
@@ -178,22 +198,22 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.sectionHeader}>{title}</Text>
         )}
       />
-
-      <Button
-        title="Go to Add Timer"
-        onPress={() => navigation.navigate("AddTimer")}
-      />
+    
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: "#f5f5f5" },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
     marginBottom: 20,
-    textAlign: "center",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
   },
   categoryContainer: {
     flexDirection: "row",
@@ -236,6 +256,13 @@ const styles = StyleSheet.create({
   },
   timerName: { fontSize: 18, fontWeight: "bold", color: "#333" },
   timerInfo: { fontSize: 14, color: "#666", marginTop: 5 },
+  sectionHeader: {
+    fontSize: 20,
+    fontWeight: "bold",
+    paddingVertical: 10,
+    marginBottom: 5,
+    borderRadius: 5,
+  },
   progressBar: {
     height: 6,
     backgroundColor: "#e0e0e0",

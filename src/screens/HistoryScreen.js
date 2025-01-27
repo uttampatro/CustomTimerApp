@@ -1,14 +1,18 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
-import { StatusBar } from "expo-status-bar";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function HistoryScreen() {
-  const historyData = [
-    { id: "1", name: "Workout Timer", completionTime: "2023-08-25 10:30:00" },
-    { id: "2", name: "Study Timer", completionTime: "2023-08-25 11:00:00" },
-    { id: "3", name: "Break Timer", completionTime: "2023-08-25 12:30:00" },
-    { id: "4", name: "Workout Timer", completionTime: "2023-08-25 14:00:00" },
-  ];
+  const [historyData, setHistoryData] = useState([]);
+
+  const loadHistory = async () => {
+    const storedHistory = await AsyncStorage.getItem("history");
+    setHistoryData(storedHistory ? JSON.parse(storedHistory) : []);
+  };
+
+  useEffect(() => {
+    loadHistory();
+  }, []);
 
   return (
     <View style={styles.container}>
