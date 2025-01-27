@@ -15,3 +15,7 @@ Make sure you have Node and npm install.
   3. Start the Application
 
      <pre>npm start</pre>
+  4. Building the APK file
+
+     <pre>eas build -p android --profile preview</pre>
+
