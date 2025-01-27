@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import { useFocusEffect } from "@react-navigation/native";
 
 export default function HomeScreen({ navigation }) {
   const [timers, setTimers] = useState([]);
-  const timerRefs = useRef({})
+  const timerRefs = useRef({});
 
   const loadTimers = async () => {
     const storedTimers = await AsyncStorage.getItem("timers");
@@ -108,38 +108,47 @@ export default function HomeScreen({ navigation }) {
       <SectionList
         sections={sections}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.timerCard}>
-            <Text style={styles.timerName}>{item.name}</Text>
-            <Text style={styles.timerInfo}>
-              Remaining Time: {item.remainingTime}s
-            </Text>
-            <Text style={styles.timerInfo}>
-              Status: {item.status || "Paused"}
-            </Text>
+        renderItem={({ item }) => {
+          const progress =
+            item.duration > 0 ? (item.remainingTime / item.duration) * 100 : 0;
 
-            <View style={styles.buttonRow}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => startTimer(item.id)}
-              >
-                <Text style={styles.buttonText}>Start</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => pauseTimer(item.id)}
-              >
-                <Text style={styles.buttonText}>Pause</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => resetTimer(item.id)}
-              >
-                <Text style={styles.buttonText}>Reset</Text>
-              </TouchableOpacity>
+          return (
+            <View style={styles.timerCard}>
+              <Text style={styles.timerName}>{item.name}</Text>
+              <Text style={styles.timerInfo}>
+                Remaining Time: {item.remainingTime}s
+              </Text>
+              <Text style={styles.timerInfo}>
+                Status: {item.status || "Paused"}
+              </Text>
+
+              <View style={styles.progressBar}>
+                <View style={[styles.progress, { width: `${progress}%` }]} />
+              </View>
+
+              <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => startTimer(item.id)}
+                >
+                  <Text style={styles.buttonText}>Start</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => pauseTimer(item.id)}
+                >
+                  <Text style={styles.buttonText}>Pause</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => resetTimer(item.id)}
+                >
+                  <Text style={styles.buttonText}>Reset</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        )}
+          );
+        }}
         renderSectionHeader={({ section: { title } }) => (
           <Text style={styles.sectionHeader}>{title}</Text>
         )}
@@ -179,6 +188,17 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginBottom: 5,
     borderRadius: 5,
+  },
+  progressBar: {
+    height: 6,
+    backgroundColor: "#e0e0e0",
+    borderRadius: 5,
+    overflow: "hidden",
+    marginVertical: 5,
+  },
+  progress: {
+    height: "100%",
+    backgroundColor: "#4CAF50",
   },
   buttonRow: {
     flexDirection: "row",
