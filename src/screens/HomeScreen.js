@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
-  Button,
   StyleSheet,
   SectionList,
   TouchableOpacity,
   Alert,
+  Button,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 
 export default function HomeScreen({ navigation }) {
   const [timers, setTimers] = useState([]);
+  const timerRefs = useRef({})
 
   const loadTimers = async () => {
     const storedTimers = await AsyncStorage.getItem("timers");
@@ -24,6 +25,70 @@ export default function HomeScreen({ navigation }) {
       loadTimers();
     }, [])
   );
+
+  const saveTimersToStorage = async (updatedTimers) => {
+    setTimers(updatedTimers);
+    await AsyncStorage.setItem("timers", JSON.stringify(updatedTimers));
+  };
+
+  const startTimer = (id) => {
+    const updatedTimers = timers.map((timer) => {
+      if (timer.id === id && timer.status !== "Running") {
+        timer.status = "Running";
+        timerRefs.current[id] = setInterval(() => {
+          updateTimer(id);
+        }, 1000);
+      }
+      return timer;
+    });
+    saveTimersToStorage(updatedTimers);
+  };
+
+  const pauseTimer = (id) => {
+    if (timerRefs.current[id]) {
+      clearInterval(timerRefs.current[id]);
+      delete timerRefs.current[id];
+    }
+    const updatedTimers = timers.map((timer) => {
+      if (timer.id === id) {
+        timer.status = "Paused";
+      }
+      return timer;
+    });
+    saveTimersToStorage(updatedTimers);
+  };
+
+  const resetTimer = (id) => {
+    if (timerRefs.current[id]) {
+      clearInterval(timerRefs.current[id]);
+      delete timerRefs.current[id];
+    }
+    const updatedTimers = timers.map((timer) => {
+      if (timer.id === id) {
+        timer.status = "Paused";
+        timer.remainingTime = timer.duration;
+      }
+      return timer;
+    });
+    saveTimersToStorage(updatedTimers);
+  };
+
+  const updateTimer = (id) => {
+    setTimers((prevTimers) =>
+      prevTimers.map((timer) => {
+        if (timer.id === id && timer.remainingTime > 0) {
+          timer.remainingTime -= 1;
+          if (timer.remainingTime === 0) {
+            timer.status = "Completed";
+            clearInterval(timerRefs.current[id]);
+            delete timerRefs.current[id];
+            Alert.alert("Timer Completed", `Timer "${timer.name}" is done!`);
+          }
+        }
+        return timer;
+      })
+    );
+  };
 
   const groupedTimers = timers.reduce((acc, timer) => {
     if (!acc[timer.category]) acc[timer.category] = [];
@@ -54,13 +119,22 @@ export default function HomeScreen({ navigation }) {
             </Text>
 
             <View style={styles.buttonRow}>
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => startTimer(item.id)}
+              >
                 <Text style={styles.buttonText}>Start</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => pauseTimer(item.id)}
+              >
                 <Text style={styles.buttonText}>Pause</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => resetTimer(item.id)}
+              >
                 <Text style={styles.buttonText}>Reset</Text>
               </TouchableOpacity>
             </View>
