@@ -88,7 +88,7 @@ export default function AddTimerScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
+  container: { flex: 1, padding: 20, backgroundColor: "#f5f5f5" },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     marginVertical: 15,
     borderRadius: 10,
     fontSize: 16,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#fff",
   },
   categoryContainer: {
     flexDirection: "row",
