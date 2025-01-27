@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, Button, FlatList, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Button,
+  FlatList,
+  StyleSheet,
+  SectionList,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -17,19 +24,35 @@ export default function HomeScreen({ navigation }) {
     }, [])
   );
 
+  const groupedTimers = timers.reduce((acc, timer) => {
+    if (!acc[timer.category]) acc[timer.category] = [];
+    acc[timer.category].push(timer);
+    return acc;
+  }, {});
+
+  const sections = Object.keys(groupedTimers).map((category) => ({
+    title: category,
+    data: groupedTimers[category],
+  }));
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Timers</Text>
 
-      <FlatList
-        data={timers}
+      <SectionList
+        sections={sections}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.timerCard}>
             <Text style={styles.timerName}>{item.name}</Text>
-            <Text style={styles.timerInfo}>Duration: {item.duration}</Text>
-            <Text style={styles.timerInfo}>Category: {item.category}</Text>
+            <Text style={styles.timerInfo}>Duration: {item.duration}s</Text>
+            <Text style={styles.timerInfo}>
+              Status: {item.status || "Paused"}
+            </Text>
           </View>
+        )}
+        renderSectionHeader={({ section: { title } }) => (
+          <Text style={styles.sectionHeader}>{title}</Text>
         )}
       />
 
@@ -61,4 +84,11 @@ const styles = StyleSheet.create({
   },
   timerName: { fontSize: 18, fontWeight: "bold", color: "#333" },
   timerInfo: { fontSize: 14, color: "#666", marginTop: 5 },
+  sectionHeader: {
+    fontSize: 20,
+    fontWeight: "bold",
+    paddingVertical: 10,
+    marginBottom: 5,
+    borderRadius: 5,
+  },
 });
