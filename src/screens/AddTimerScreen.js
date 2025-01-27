@@ -22,6 +22,23 @@ export default function AddTimerScreen({ navigation }) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
+  
+    const newTimer = {
+      id: Math.random().toString(),
+      name,
+      duration: parseInt(duration),
+      category,
+      remainingTime: parseInt(duration),
+      status: "Paused",
+    };
+  
+    let timers = await AsyncStorage.getItem("timers");
+    timers = timers ? JSON.parse(timers) : [];
+  
+    timers.push(newTimer);
+  
+    await AsyncStorage.setItem("timers", JSON.stringify(timers));
+  
     navigation.goBack();
   };
 
