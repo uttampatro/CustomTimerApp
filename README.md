@@ -5,9 +5,9 @@
 Make sure you have Node and npm install.
 
   1. Clone or Download the repository 
-  
-    <pre>git clone https://github.com/uttampatro/CustomTimerApp.git
-     cd CustomTimerApp</pre>
+
+    <pre>git clone https://github.com/uttampatro/CustomTimerApp.git</pre>
+    <pre>cd CustomTimerApp</pre>
   2. Install Dependencies
 
       <pre>npm install -g expo-cli</pre>
