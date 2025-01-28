@@ -12,6 +12,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
+        
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="AddTimer" component={AddTimerScreen} />
         <Stack.Screen name="History" component={HistoryScreen} />
